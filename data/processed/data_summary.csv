@@ -1,0 +1,4 @@
+dataset,count,missing_coords,duplicate_coords,source
+existing_chargers,8,0,0,synthetic
+candidate_sites,552,0,0,synthetic_grid
+demand_points,1500,0,0,synthetic

@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EV-OptiMap · Indore</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header>
+    <h1>EV-OptiMap <span>EV charging station placement · Indore</span></h1>
+  </header>
+
+  <main>
+    <aside>
+      <section class="card">
+        <h2>Dashboard</h2>
+        <div class="stats">
+          <div><b id="s-chargers">–</b><small>Existing chargers</small></div>
+          <div><b id="s-demand">–</b><small>Demand points</small></div>
+          <div><b id="s-cands">–</b><small>Candidate sites</small></div>
+        </div>
+        <p id="data-note" class="note"></p>
+      </section>
+
+      <section class="card">
+        <h2>Live editing <span id="live-badge" class="badge">live</span></h2>
+        <div class="modes">
+          <button class="mode active" data-mode="pan">Pan</button>
+          <button class="mode" data-mode="add-charger">+ Charger</button>
+          <button class="mode" data-mode="add-demand">+ Demand</button>
+          <button class="mode" data-mode="remove-charger">Remove charger</button>
+        </div>
+        <p id="mode-hint" class="note">Pan mode: map normal chalega.</p>
+        <div id="demand-opts" hidden>
+          <label>Demand type
+            <select id="dcat">
+              <option value="commercial">Commercial</option>
+              <option value="residential">Residential</option>
+              <option value="parking">Parking</option>
+              <option value="public">Public</option>
+            </select></label>
+          <label>Points in hotspot
+            <input id="dcount" type="number" min="1" max="500" value="40"></label>
+        </div>
+        <label class="inline"><input id="auto" type="checkbox" checked> Auto re-optimize after each edit</label>
+        <button id="reset" class="secondary">Reset to original data</button>
+        <p id="live-status" class="note"></p>
+      </section>
+
+      <section class="card">
+        <h2>Optimization controls</h2>
+        <label>New stations (K)
+          <input id="k" type="number" min="0" max="200" value="10"></label>
+        <label>Coverage radius (km)
+          <input id="radius" type="number" min="0.1" max="20" step="0.1" value="2"></label>
+        <label>Cost per station (optional)
+          <input id="cost" type="number" min="0" placeholder="e.g. 1500000"></label>
+        <label>Total budget (optional)
+          <input id="budget" type="number" min="0" placeholder="e.g. 10000000"></label>
+        <button id="run">Run optimization</button>
+        <p id="error" class="error"></p>
+      </section>
+
+      <section class="card" id="result-card" hidden>
+        <h2>Results</h2>
+        <table>
+          <tr><th></th><th>Before</th><th>Greedy</th></tr>
+          <tr><td>Weighted coverage</td><td id="r-before-cov"></td><td id="r-after-cov"></td></tr>
+          <tr><td>Avg distance (km)</td><td id="r-before-dist"></td><td id="r-after-dist"></td></tr>
+        </table>
+        <p>Random baseline (mean of trials): <b id="r-rand"></b><br>
+           Improvement over random: <b id="r-impr"></b> pts<br>
+           Stations: <b id="r-n"></b> · Est. cost: <b id="r-cost"></b></p>
+        <table id="sel-table"><thead><tr><th>#</th><th>Lat</th><th>Lon</th><th>New demand</th></tr></thead><tbody></tbody></table>
+        <p id="links"><a id="export" href="#">Download CSV</a> · <a id="details" href="#">Details page</a></p>
+        <p id="unsaved" class="note" hidden>Live preview (saved nahi hua). "Run optimization" dabao to history mein save ho.</p>
+      </section>
+
+      <section class="card">
+        <h2>Budget comparison</h2>
+        <button id="compare" class="secondary">Compare K = 5, 10, 15</button>
+        <table id="cmp-table" hidden><thead><tr><th>K</th><th>Greedy %</th><th>Random %</th><th>Avg km</th></tr></thead><tbody></tbody></table>
+      </section>
+
+      <section class="card">
+        <h2>Run history</h2>
+        <table id="hist-table"><thead><tr><th>ID</th><th>K</th><th>R</th><th>Greedy %</th></tr></thead><tbody></tbody></table>
+      </section>
+
+      <p class="note small">Results are estimates from proxy demand data and straight-line distance. Recommended sites are candidates, not approved installation locations.</p>
+    </aside>
+
+    <div id="map"></div>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+  <script src="{{ url_for('static', filename='js/map.js') }}"></script>
+</body>
+</html>

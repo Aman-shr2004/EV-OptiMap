@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Run {{ run_id }} · EV-OptiMap</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <header><h1>EV-OptiMap <span>Run #{{ run_id }}</span></h1></header>
+  <div class="page">
+    <p><a href="{{ url_for('index') }}">&larr; Back to map</a> · <a href="{{ url_for('export_csv', run_id=run_id) }}">Download CSV</a></p>
+
+    <section class="card">
+      <h2>Parameters</h2>
+      <p>K = {{ r.params.k }} · radius = {{ r.params.radius_km }} km
+      {% if r.params.cost_per_station %}· cost/station = {{ r.params.cost_per_station }}{% endif %}
+      {% if r.params.budget %}· budget = {{ r.params.budget }}{% endif %}</p>
+    </section>
+
+    <section class="card">
+      <h2>Coverage summary</h2>
+      <table>
+        <tr><th>Metric</th><th>Existing only</th><th>With greedy picks</th></tr>
+        <tr><td>Weighted demand coverage</td>
+            <td>{{ '%.1f'|format(r.existing_coverage.weighted_coverage_pct) }}%</td>
+            <td>{{ '%.1f'|format(r.greedy.weighted_coverage_pct) }}%</td></tr>
+        <tr><td>Uncovered demand weight</td>
+            <td>{{ '%.0f'|format(r.existing_coverage.uncovered_demand) }}</td>
+            <td>{{ '%.0f'|format(r.greedy.uncovered_demand) }}</td></tr>
+        <tr><td>Average distance to nearest charger (km)</td>
+            <td>{{ '%.2f'|format(r.existing_coverage.avg_distance_km) if r.existing_coverage.avg_distance_km is not none else 'n/a' }}</td>
+            <td>{{ '%.2f'|format(r.greedy.avg_distance_km) if r.greedy.avg_distance_km is not none else 'n/a' }}</td></tr>
+      </table>
+      <p>Random baseline mean coverage: <b>{{ '%.1f'|format(r.random_baseline.mean_coverage_pct) }}%</b>
+         ({{ r.random_baseline.trials }} trials, best {{ '%.1f'|format(r.random_baseline.best_coverage_pct) }}%).
+         Greedy improvement over random mean: <b>{{ '%.1f'|format(r.improvement_over_random_pct_points) }}</b> percentage points.</p>
+    </section>
+
+    <section class="card">
+      <h2>Selected locations</h2>
+      <table>
+        <thead><tr><th>#</th><th>Candidate</th><th>Lat</th><th>Lon</th><th>New demand covered</th></tr></thead>
+        <tbody>
+        {% for s in r.selected %}
+          <tr><td>{{ s.rank }}</td><td>{{ s.candidate_id }}</td><td>{{ '%.5f'|format(s.lat) }}</td>
+              <td>{{ '%.5f'|format(s.lon) }}</td><td>{{ '%.1f'|format(s.new_demand_covered) }}</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <p class="note small">Weighted demand coverage is an estimate from proxy data, not population or EV coverage.
+    Recommended sites are candidate locations, not approved installation sites.</p>
+  </div>
+</body>
+</html>
